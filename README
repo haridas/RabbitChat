@@ -2,7 +2,7 @@ RabbitChat
 =========
 
 ****************************************************************************************
- RabbitChat - A simple webbased chat sytem based on RabbitMQ + Tornado + Websocket.
+ RabbitChat - A simple web based chat sytem based on RabbitMQ + Tornado + Websocket.
 
  Copyright (C) 2011,  Haridas N <haridas.nss@gmail.com>
  
@@ -36,7 +36,7 @@ To install python packages :-
 
 2. Simillerly, easy_install pika, 
 
-3. To know more about the Websocket browser implementation, get a copy from "https://github.com/stdva/web-socket-js"
+3. To know more about the Websocket browser implementation, get a copy from https://github.com/stdva/web-socket-js
 
 
 
@@ -45,12 +45,12 @@ HOW to RUN
 
 From the Tornado application folder, run 
 
-#cd toranad_app
+#cd tornad_app
 
-#python rabbit_chat
+#python rabbit_chat.py
 
 
-Take "http://localhost:8888/chat" on your browser(Chrome or Firefox 4, the browser should support websocket.)
+Take http://localhost:8888/chat on your browser(Chrome or Firefox 4, the browser should support websocket.)
 
 
 

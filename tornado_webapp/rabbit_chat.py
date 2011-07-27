@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-	RabbitChat - A simple webbased chat sytem based on RabbitMQ + Tornado + Websocket.
+	RabbitChat - A simple web based chat sytem based on RabbitMQ + Tornado + Websocket.
 
 	Copyright (C) 2011,  Haridas N <haridas.nss@gmail.com>
 
