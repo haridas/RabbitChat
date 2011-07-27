@@ -45,7 +45,7 @@ HOW to RUN
 
 From the Tornado application folder, run 
 
-#cd tornad_app
+#cd tornado_app
 
 #python rabbit_chat.py
 
