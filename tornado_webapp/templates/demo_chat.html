@@ -1,0 +1,75 @@
+<html>
+<head>
+<title> Websocket Client: Send/Receive Test </title>
+<script type="text/javascript" src="/static/web_socket.js"> </script>
+
+<script type="text/javascript" src="/static/swfobject.js"> </script>
+
+
+<script type="text/javascript">
+
+WEB_SOCKET_SWF_LOCATION = "/static/WebSocketMain.swf";
+
+
+function log(msg){
+
+	var d = new Date();
+	var hour = d.getHours();
+	var min = d.getMinutes();
+	var sec = d.getSeconds();
+	var msec = d.getMilliseconds();
+	var time = hour + ":" + min + ":" + sec + ":" + msec;
+	document.getElementById('chat_log').innerHTML += time + ": " + msg + "</br/>";
+}
+
+
+function ws_init(url) {
+
+	log("connecting to" + url + "...");
+	ws = new WebSocket(url);
+	ws.onopen = function(){	
+			log("Connection established");
+		};
+	ws.onmessage = function(msg){
+			log("Message Received:  '" + msg.data + "'" );
+		};
+	ws.onclose = function(){
+			log("Connection Closed");
+		}
+
+}
+
+function ws_send(msg){
+	log("Send: " + msg);
+	ws.send(msg);
+}
+
+function ws_close(){
+	log("closing connection..");
+	ws.close();
+}
+</script>
+
+</head>
+<body>
+<form name="input_form">
+	<table>
+		<tr>
+			<td> Host/Resource: </td>
+			<td> <input type="text" name="host" size="50" value="ws://localhost:8888/ws_channel"> </td>
+			<td> <input type="button" value="connect" onclick="ws_init(document.input_form.host.value)"> </td>
+			<td> <input type="button" value="close" onclick="ws_close()"></td>
+
+		</tr>
+
+		<tr>	<td> Message </td>
+			<td> <input type="text" name="msg" size="50" align="center"> </td>
+			<td> <input type="button" value="send" onclick="ws_send(document.input_form.msg.value)"> </td>
+		</tr>
+
+	</table>
+</form>
+
+<div id="chat_log"> </div>
+</body>
+</html>
