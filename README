@@ -17,9 +17,9 @@ A simple web based chat system developed by using RabbitMQ + Tornado + Websocket
 
 I commited two versions of this chat system, the difference is with the creation of RabbitMQ channel and connection.
 
-In the first version we create rabbitMQ connection and channel for each incomming websocket connection. So we do this in the Websocket handler of Tornado application.
+In the first version(master branch) we create rabbitMQ connection and channel for each incomming websocket connection. So we do this in the Websocket handler of Tornado application.
 
-In the latest one I used RabbitMQ more effectively by controlling the RabbitMQ channle andconnection creation, so according to this the latest version it use  one connection and one  channel for every websocket request. ie; we reusing the RabbitMQ connection and channels.
+In the latest one (The Branch RabbitChat-new)  I used RabbitMQ more effectively by controlling the RabbitMQ channle andconnection creation, so according to this the latest version it use  one connection and one  channel for every websocket request. ie; we reusing the RabbitMQ connection and channels.
 
 
 
@@ -43,15 +43,16 @@ To install python packages :-
 HOW to RUN
 ==========
 
-From the Tornado application folder, run 
+Enter in to tornado application folder and run the python script.
 
 #cd tornado_app
 
 #python rabbit_chat.py
 
 
-Take http://localhost:8888/chat on your browser(Chrome or Firefox 4, the browser should support websocket.)
+Take this URL http://localhost:8888/chat on your browser(Chrome or Firefox 4, the browser should support websocket.)
 
+Enjoy ...:)
 
 
 
