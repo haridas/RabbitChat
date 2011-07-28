@@ -1,3 +1,12 @@
+'''
+	RabbitChat - A simple web based chat sytem based on RabbitMQ + Tornado + Websocket.
+
+	Copyright (C) 2011,  Haridas N <haridas.nss@gmail.com>
+
+	Check RabbitChat/LICENSE file for full copyright notice.
+'''
+
+
 import json
 import os
 import sys

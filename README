@@ -1,8 +1,8 @@
-RabbitChat-new
+RabbitChat
 =============
 
 ****************************************************************************************
- RabbitChat-new - A simple web based chat sytem based on RabbitMQ + Tornado + Websocket.
+ RabbitChat - A simple web based chat sytem based on RabbitMQ + Tornado + Websocket.
 
  Copyright (C) 2011,  Haridas N <haridas.nss@gmail.com>
  
@@ -43,7 +43,7 @@ To install python packages :-
 HOW to RUN
 ==========
 
-From the Tornado application folder, run 
+From the Main Project folder,
 
 #cd tornado_app
 
