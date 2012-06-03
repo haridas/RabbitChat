@@ -44,11 +44,11 @@ To install python packages :-
 HOW to RUN
 ==========
 
-Enter in to tornado application folder and run the python script.
+Enter in to tornado application folder and run the python script:
 
-#cd tornado_app
+    >cd tornado_app
 
-#python rabbit_chat.py
+    >python rabbit_chat.py
 
 
 Take this URL http://localhost:8888/chat on your browser(Chrome or Firefox 4, the browser should support websocket.)
