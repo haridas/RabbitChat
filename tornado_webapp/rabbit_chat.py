@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-'''
-	RabbitChat - A simple web based chat sytem based on RabbitMQ + Tornado + Websocket.
+"""
 
-	Copyright (C) 2011,  Haridas N <haridas.nss@gmail.com>
+RabbitChat - A simple web based chat sytem based on
+            RabbitMQ + Tornado + Websocket.
 
-	Check RabbitChat/LICENSE file for full copyright notice.
+Copyright (C) 2011,  Haridas N <haridas.nss@gmail.com>
 
-'''
+Check RabbitChat/LICENSE file for full copyright notice.
+"""
+
 from __future__ import print_function
-import json
 import os
-import sys
 
 import tornado.httpserver
 import tornado.ioloop
@@ -20,7 +20,6 @@ from tornado.options import options, define
 
 import pika
 from pika.adapters.tornado_connection import TornadoConnection
-
 
 
 # Define available options
@@ -36,29 +35,28 @@ PORT = 8888
 class PikaClient(object):
 
     def __init__(self):
+
         # Construct a queue name we'll use for this instance only
-              
+
         #Giving unique queue for each consumer under a channel.
         self.queue_name = "queue-%s" % (id(self),)
-	
-	# Default values
+        # Default values
         self.connected = False
         self.connecting = False
         self.connection = None
         self.channel = None
 
-	#Webscoket object.
-	self.websocket = None
-	
-        
+        #Webscoket object.
+        self.websocket = None
+
     def connect(self):
-    
-	if self.connecting:
-            print('PikaClient: Already connecting to RabbitMQ')
-            return
-        
+
+        if self.connecting:
+                print('PikaClient: Already connecting to RabbitMQ')
+                return
+
         print('PikaClient: Connecting to RabbitMQ on localhost:5672, Object: %s' % (self,))
-        
+
         self.connecting = True
 
         credentials = pika.PlainCredentials('guest', 'guest')
@@ -68,7 +66,7 @@ class PikaClient(object):
                                           credentials=credentials)
         self.connection = TornadoConnection(param,
                                             on_open_callback=self.on_connected)
-        
+
         #Currently this will close tornado ioloop.
         #self.connection.add_on_close_callback(self.on_closed)
 
@@ -79,9 +77,11 @@ class PikaClient(object):
         self.connection.channel(self.on_channel_open)
 
     def on_channel_open(self, channel):
-        print('PikaClient: Channel Open, Declaring Exchange, Channel ID: %s' % (channel,))
+
+        print('PikaClient: Channel Open, Declaring Exchange, Channel ID: %s' %
+              (channel,))
         self.channel = channel
-        
+
         self.channel.exchange_declare(exchange='tornado',
                                       type="direct",
                                       auto_delete=True,
@@ -91,35 +91,31 @@ class PikaClient(object):
     def on_exchange_declared(self, frame):
         print('PikaClient: Exchange Declared, Declaring Queue')
         self.channel.queue_declare(auto_delete=True,
-        			   queue = self.queue_name,
-         		           durable=False,
-                		   exclusive=True,
-                		   callback=self.on_queue_declared)
-       	
-       
+                                   queue=self.queue_name,
+                                   durable=False,
+                                   exclusive=True,
+                                   callback=self.on_queue_declared)
 
     def on_queue_declared(self, frame):
-    
+
         print('PikaClient: Queue Declared, Binding Queue')
         self.channel.queue_bind(exchange='tornado',
                                 queue=self.queue_name,
                                 routing_key='tornado.*',
                                 callback=self.on_queue_bound)
-	
+
     def on_queue_bound(self, frame):
         print('PikaClient: Queue Bound, Issuing Basic Consume')
         self.channel.basic_consume(consumer_callback=self.on_pika_message,
                                    queue=self.queue_name,
                                    no_ack=True)
-        
+
     def on_pika_message(self, channel, method, header, body):
-        print('PikaCient: Message receive, delivery tag #%i' % \
-                     method.delivery_tag)
-     
+        print('PikaCient: Message receive, delivery tag #%i' %
+              method.delivery_tag)
+
         #Send the Cosumed message via Websocket to browser.
         self.websocket.write_message(body)
-        
-        
 
     def on_basic_cancel(self, frame):
         print('PikaClient: Basic Cancel Ok')
@@ -129,99 +125,88 @@ class PikaClient(object):
     def on_closed(self, connection):
         # We've closed our pika connection so stop the demo
         tornado.ioloop.IOLoop.instance().stop()
-	
-	
+
     def sample_message(self, ws_msg):
-  	#Publish the message from Websocket to RabbitMQ
-       	properties = pika.BasicProperties(content_type="text/plain",delivery_mode=1)
-        
+        #Publish the message from Websocket to RabbitMQ
+        properties = pika.BasicProperties(
+            content_type="text/plain", delivery_mode=1)
+
         self.channel.basic_publish(exchange='tornado',
                                    routing_key='tornado.*',
-                                   body = ws_msg,
+                                   body=ws_msg,
                                    properties=properties)
-       
 
 
 class LiveChat(tornado.web.RequestHandler):
 
     @tornado.web.asynchronous
     def get(self):
-        
+
         # Send our main document
         self.render("demo_chat.html",
                     connected=self.application.pika.connected)
 
 
-
-
 class WebSocketServer(tornado.websocket.WebSocketHandler):
-	'WebSocket Handler, Which handle new websocket connection.'
-			
-	def open(self):
-		'Websocket Connection opened.'
-		
-		#Initialize new pika client object for this websocket.
-		self.pika_client = PikaClient()
-		
-		#Assign websocket object to a Pika client object attribute.
-		self.pika_client.websocket = self
-		
-		ioloop.add_timeout(1000, self.pika_client.connect)
-		
-	def on_message(self,msg):
-		'A message on the Webscoket.'
-		
-		#Publish the received message on the RabbitMQ
-		self.pika_client.sample_message(msg)
-		
-		
-	def on_close(self):
-		'Closing the websocket..'
-		print("WebSocket Closed")
-		
-		#close the RabbiMQ connection...
-		self.pika_client.connection.close()
+    'WebSocket Handler, Which handle new websocket connection.'
+
+    def open(self):
+        'Websocket Connection opened.'
+
+        #Initialize new pika client object for this websocket.
+        self.pika_client = PikaClient()
+
+        #Assign websocket object to a Pika client object attribute.
+        self.pika_client.websocket = self
+
+        ioloop.add_timeout(1000, self.pika_client.connect)
+
+    def on_message(self, msg):
+        'A message on the Webscoket.'
+
+        #Publish the received message on the RabbitMQ
+        self.pika_client.sample_message(msg)
+
+    def on_close(self):
+        'Closing the websocket..'
+        print("WebSocket Closed")
+
+        #close the RabbiMQ connection...
+        self.pika_client.connection.close()
 
 
 class TornadoWebServer(tornado.web.Application):
-	' Tornado Webserver Application...'
-	def __init__(self):
+    ' Tornado Webserver Application...'
+    def __init__(self):
 
-		#Url to its handler mapping.
-		handlers = [
-	
-		        (r"/ws_channel",WebSocketServer),
-	        	(r"/chat",LiveChat)
-		]
-	
-		#Other Basic Settings..
-		settings = dict(
-			cookie_secret = options.cookie_secret,
-                	login_url = "/signin",
-	                template_path = os.path.join(os.path.dirname(__file__),"templates"),
-        	        static_path = os.path.join(os.path.dirname(__file__),"static"),
-                	xsrf_cookies = True,
-	                debug = True
+        #Url to its handler mapping.
+        handlers = [(r"/ws_channel", WebSocketServer),
+                    (r"/chat", LiveChat)]
 
-		)
-	
-		#Initialize Base class also.
-		tornado.web.Application.__init__(self,handlers,**settings)
-	
+        #Other Basic Settings..
+        settings = dict(
+            cookie_secret=options.cookie_secret,
+            login_url="/signin",
+            template_path=os.path.join(os.path.dirname(__file__),
+                                       "templates"),
+            static_path=os.path.join(os.path.dirname(__file__), "static"),
+            xsrf_cookies=True,
+            debug=True)
+
+        #Initialize Base class also.
+        tornado.web.Application.__init__(self, handlers, **settings)
 
 
 if __name__ == '__main__':
-    
+
     #Tornado Application
     print("Initializing Tornado Webapplications settings...")
     application = TornadoWebServer()
-    
+
     # Helper class PikaClient makes coding async Pika apps in tornado easy
     pc = PikaClient()
     application.pika = pc  # We want a shortcut for below for easier typing
 
-    
-    
     # Start the HTTP Server
     print("Starting Tornado HTTPServer on port %i" % PORT)
     http_server = tornado.httpserver.HTTPServer(application)
