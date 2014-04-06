@@ -7,6 +7,7 @@
 	Check RabbitChat/LICENSE file for full copyright notice.
 
 '''
+from __future__ import print_function
 import json
 import os
 import sys
@@ -53,10 +54,10 @@ class PikaClient(object):
     def connect(self):
     
 	if self.connecting:
-            pika.log.info('PikaClient: Already connecting to RabbitMQ')
+            print('PikaClient: Already connecting to RabbitMQ')
             return
         
-        pika.log.info('PikaClient: Connecting to RabbitMQ on localhost:5672, Object: %s' % (self,))
+        print('PikaClient: Connecting to RabbitMQ on localhost:5672, Object: %s' % (self,))
         
         self.connecting = True
 
@@ -72,13 +73,13 @@ class PikaClient(object):
         #self.connection.add_on_close_callback(self.on_closed)
 
     def on_connected(self, connection):
-        pika.log.info('PikaClient: Connected to RabbitMQ on localhost:5672')
+        print('PikaClient: Connected to RabbitMQ on localhost:5672')
         self.connected = True
         self.connection = connection
         self.connection.channel(self.on_channel_open)
 
     def on_channel_open(self, channel):
-        pika.log.info('PikaClient: Channel Open, Declaring Exchange, Channel ID: %s' % (channel,))
+        print('PikaClient: Channel Open, Declaring Exchange, Channel ID: %s' % (channel,))
         self.channel = channel
         
         self.channel.exchange_declare(exchange='tornado',
@@ -88,7 +89,7 @@ class PikaClient(object):
                                       callback=self.on_exchange_declared)
 
     def on_exchange_declared(self, frame):
-        pika.log.info('PikaClient: Exchange Declared, Declaring Queue')
+        print('PikaClient: Exchange Declared, Declaring Queue')
         self.channel.queue_declare(auto_delete=True,
         			   queue = self.queue_name,
          		           durable=False,
@@ -99,20 +100,20 @@ class PikaClient(object):
 
     def on_queue_declared(self, frame):
     
-        pika.log.info('PikaClient: Queue Declared, Binding Queue')
+        print('PikaClient: Queue Declared, Binding Queue')
         self.channel.queue_bind(exchange='tornado',
                                 queue=self.queue_name,
                                 routing_key='tornado.*',
                                 callback=self.on_queue_bound)
 	
     def on_queue_bound(self, frame):
-        pika.log.info('PikaClient: Queue Bound, Issuing Basic Consume')
+        print('PikaClient: Queue Bound, Issuing Basic Consume')
         self.channel.basic_consume(consumer_callback=self.on_pika_message,
                                    queue=self.queue_name,
                                    no_ack=True)
         
     def on_pika_message(self, channel, method, header, body):
-        pika.log.info('PikaCient: Message receive, delivery tag #%i' % \
+        print('PikaCient: Message receive, delivery tag #%i' % \
                      method.delivery_tag)
      
         #Send the Cosumed message via Websocket to browser.
@@ -121,7 +122,7 @@ class PikaClient(object):
         
 
     def on_basic_cancel(self, frame):
-        pika.log.info('PikaClient: Basic Cancel Ok')
+        print('PikaClient: Basic Cancel Ok')
         # If we don't have any more consumer processes running close
         self.connection.close()
 
@@ -176,7 +177,7 @@ class WebSocketServer(tornado.websocket.WebSocketHandler):
 		
 	def on_close(self):
 		'Closing the websocket..'
-		print "WebSocket Closed"
+		print("WebSocket Closed")
 		
 		#close the RabbiMQ connection...
 		self.pika_client.connection.close()
@@ -211,11 +212,8 @@ class TornadoWebServer(tornado.web.Application):
 
 if __name__ == '__main__':
     
-    # Set our pika.log options
-    pika.log.setup(color=True)
- 	
     #Tornado Application
-    pika.log.info("Initializing Tornado Webapplications settings...")
+    print("Initializing Tornado Webapplications settings...")
     application = TornadoWebServer()
     
     # Helper class PikaClient makes coding async Pika apps in tornado easy
@@ -225,7 +223,7 @@ if __name__ == '__main__':
     
     
     # Start the HTTP Server
-    pika.log.info("Starting Tornado HTTPServer on port %i" % PORT)
+    print("Starting Tornado HTTPServer on port %i" % PORT)
     http_server = tornado.httpserver.HTTPServer(application)
     http_server.listen(PORT)
 
