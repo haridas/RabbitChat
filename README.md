@@ -35,7 +35,7 @@ To install python packages :-
 =============================
 1. To install Tornado use this command: "easy_install tornado" ,
 
-2. Simillerly, easy_install pika, 
+2. Similarly, easy_install pika, 
 
 3. To know more about the Websocket browser implementation, get a copy from https://github.com/stdva/web-socket-js
 
